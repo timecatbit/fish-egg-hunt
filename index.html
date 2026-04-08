@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐳 魚的秘密花園 🐳</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow-x:hidden}
+body{
+  font-family:'Noto Sans TC',sans-serif;
+  background:linear-gradient(180deg,#000d1a 0%,#001a33 30%,#00264d 60%,#003366 100%);
+  color:#cce6ff;
+  min-height:200vh;
+  position:relative;
+  cursor:default;
+  user-select:none;
+}
+
+/* Ocean floor */
+.ocean-floor{
+  position:fixed;bottom:0;left:0;right:0;height:80px;
+  background:linear-gradient(180deg,transparent,#001122);
+  z-index:1;pointer-events:none;
+}
+.sand{
+  position:fixed;bottom:0;left:0;right:0;height:40px;
+  background:linear-gradient(180deg,#c8a96e,#e8c89e,#f0d9a8);
+  z-index:2;cursor:pointer;
+}
+.sand::before{content:'🐚🌊🐚';position:absolute;top:-10px;left:5%;font-size:1.2rem;opacity:0.6}
+.sand::after{content:'🦀';position:absolute;top:-8px;right:8%;font-size:1rem}
+
+/* Bubbles */
+.bubbles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bubble{
+  position:absolute;bottom:-20px;border-radius:50%;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.2);
+  animation:bubbleRise linear infinite;
+  cursor:pointer;
+  pointer-events:all;
+}
+@keyframes bubbleRise{
+  0%{transform:translateY(0) scale(1);opacity:0.6}
+  100%{transform:translateY(-110vh) scale(0.3);opacity:0}
+}
+.bubble.popping{
+  animation:bubblePop 0.3s ease-out forwards!important;
+  background:rgba(255,255,255,0.4)!important;
+}
+@keyframes bubblePop{
+  0%{transform:scale(1);opacity:1}
+  100%{transform:scale(2);opacity:0}
+}
+
+/* Swimming fish background */
+.fish-bg{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+}
+.fish-swimmer{
+  position:absolute;font-size:1.5rem;
+  animation-timing-function:linear;
+  animation-iteration-count:infinite;
+  white-space:nowrap;
+}
+@keyframes swimRight{
+  0%{transform:translateX(-60px) scaleX(1)}
+  49%{transform:translateX(110vw) scaleX(1)}
+  50%{transform:translateX(110vw) scaleX(-1)}
+  99%{transform:translateX(-60px) scaleX(-1)}
+  100%{transform:translateX(-60px) scaleX(1)}
+}
+@keyframes swimLeft{
+  0%{transform:translateX(110vw) scaleX(-1)}
+  49%{transform:translateX(-60px) scaleX(-1)}
+  50%{transform:translateX(-60px) scaleX(1)}
+  99%{transform:translateX(110vw) scaleX(1)}
+  100%{transform:translateX(110vw) scaleX(-1)}
+}
+
+/* Title */
+.title-wrap{
+  position:relative;z-index:10;text-align:center;padding:60px 20px 40px;
+}
+.title{
+  font-size:clamp(2rem,6vw,4rem);font-weight:900;
+  background:linear-gradient(135deg,#4dd0e1,#00bcd4,#4fc3f7,#80deea);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  text-shadow:none;filter:drop-shadow(0 0 20px rgba(77,208,225,0.5));
+  cursor:pointer;display:inline-block;letter-spacing:0.05em;
+}
+.title:active{transform:scale(0.97)}
+
+/* Subtitle */
+.subtitle{
+  font-size:1rem;color:#4dd0e1;margin-top:8px;opacity:0.7;
+  letter-spacing:0.15em;
+}
+
+/* Fish Cards */
+.cards-section{padding:20px;position:relative;z-index:10}
+.cards-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:14px;max-width:900px;margin:0 auto;
+}
+.fish-card{
+  background:rgba(0,40,70,0.6);
+  border:1px solid rgba(77,208,225,0.25);
+  border-radius:16px;padding:16px 12px;
+  text-align:center;cursor:pointer;
+  transition:all 0.2s;
+  backdrop-filter:blur(8px);
+  position:relative;overflow:hidden;
+}
+.fish-card:hover{
+  background:rgba(0,60,100,0.7);
+  border-color:rgba(77,208,225,0.6);
+  transform:translateY(-3px);
+  box-shadow:0 8px 24px rgba(0,180,220,0.2);
+}
+.fish-card .icon{font-size:2.4rem;margin-bottom:6px;display:block}
+.fish-card .name{font-size:0.8rem;font-weight:700;color:#80deea}
+.fish-card .sub{font-size:0.65rem;color:#4dd0e1;opacity:0.7;margin-top:2px}
+.fish-card .count{font-size:0.6rem;color:#008fb3;margin-top:4px}
+
+/* Special interactive elements */
+.elements-row{
+  display:flex;flex-wrap:wrap;gap:20px;justify-content:center;
+  padding:30px 20px;position:relative;z-index:10;
+}
+.ocean-el{
+  font-size:2.5rem;cursor:pointer;
+  filter:drop-shadow(0 0 8px rgba(77,208,225,0.4));
+  transition:transform 0.2s;display:inline-block;
+}
+.ocean-el:hover{transform:scale(1.15)}
+
+/* Easter egg effects layer */
+.effect-layer{
+  position:fixed;inset:0;pointer-events:none;z-index:999;
+  overflow:hidden;
+}
+.effect-item{
+  position:absolute;pointer-events:all;
+  animation-fill-mode:forwards;
+}
+
+/* Wave decoration */
+.wave-deco{
+  position:fixed;bottom:40px;left:0;right:0;height:60px;
+  pointer-events:none;z-index:3;opacity:0.15;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%2300bcd4' d='M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,181.3C960,171,1056,181,1152,197.3C1248,213,1344,235,1392,245.3L1440,256L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'/%3E%3C/svg%3E") repeat-x bottom;
+  background-size:200px 60px;
+}
+
+/* Secret elements */
+.secret-trigger{
+  position:fixed;bottom:45px;right:20px;font-size:0.7rem;
+  color:rgba(77,208,225,0.3);cursor:pointer;z-index:10;
+  letter-spacing:0.1em;
+}
+
+/* Depth markers */
+.depth-marker{
+  position:fixed;right:10px;font-size:0.6rem;
+  color:rgba(77,208,225,0.25);z-index:5;
+  writing-mode:vertical-rl;
+}
+
+/* 🌊 wave animation for tsunami */
+@keyframes tsunamiWave{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(200%)}
+}
+.tsunami-wave{
+  position:fixed;bottom:0;left:0;width:200%;height:120px;
+  background:linear-gradient(180deg,rgba(0,150,200,0.6),rgba(0,80,120,0.8));
+  z-index:998;pointer-events:none;
+  animation:tsunamiWave 2s ease-in forwards;
+}
+
+/* 💀 devil fish */
+.devil-fish{
+  position:fixed;top:30%;left:50%;transform:translateX(-50%);
+  font-size:4rem;z-index:900;pointer-events:none;
+  animation:devilAppear 3s ease-out forwards;
+}
+@keyframes devilAppear{
+  0%{opacity:0;transform:translateX(-50%) scale(0.5)}
+  20%{opacity:1;transform:translateX(-50%) scale(1.1)}
+  80%{opacity:1;transform:translateX(-50%) scale(1)}
+  100%{opacity:0;transform:translateX(-50%) scale(0.8)}
+}
+
+/* 🌈 rainbow fish */
+@keyframes rainbowFlash{
+  0%,100%{filter:hue-rotate(0deg) brightness(1)}
+  50%{filter:hue-rotate(360deg) brightness(1.3)}
+}
+.rainbow-active{animation:rainbowFlash 2s ease-in-out}
+
+/* Konami hint */
+.konami-hint{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:rgba(0,0,0,0.9);border:1px solid #4dd0e1;
+  border-radius:16px;padding:24px 40px;text-align:center;
+  z-index:9999;font-size:0.9rem;color:#cce6ff;
+  box-shadow:0 0 40px rgba(77,208,225,0.3);
+  pointer-events:none;
+}
+.konami-hint span{color:#4dd0e1;font-size:1.5rem;display:block;margin-bottom:8px}
+
+/* 🌀 vortex */
+@keyframes vortexSpin{
+  0%{transform:rotate(0deg) scale(1);opacity:1}
+  100%{transform:rotate(720deg) scale(0);opacity:0}
+}
+.vortex{
+  position:fixed;top:50%;left:50%;
+  width:300px;height:300px;margin:-150px 0 0 -150px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(0,80,120,0.8),transparent 70%);
+  border:4px solid rgba(77,208,225,0.5);
+  z-index:997;pointer-events:none;
+  animation:vortexSpin 2s ease-out forwards;
+}
+
+/* Treasure chest */
+@keyframes chestOpen{
+  0%{transform:scale(1)}
+  30%{transform:scale(1.2) rotate(-5deg)}
+  60%{transform:scale(1.3) rotate(5deg)}
+  100%{transform:scale(1) rotate(0deg)}
+}
+.chest-burst{
+  position:fixed;top:40%;left:50%;margin-left:-60px;
+  font-size:5rem;z-index:900;
+  animation:chestOpen 1.5s ease-out forwards;
+  pointer-events:none;
+}
+
+/* Scroll indicators */
+.scroll-zone{
+  position:fixed;left:10px;top:50%;transform:translateY(-50%);
+  font-size:0.6rem;color:rgba(77,208,225,0.2);z-index:5;
+  writing-mode:vertical-rl;
+}
+
+/* Message flash */
+.msg-flash{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:rgba(0,20,40,0.92);border:1px solid #4dd0e1;
+  border-radius:20px;padding:20px 48px;
+  font-size:1.2rem;font-weight:700;color:#80deea;
+  z-index:9999;text-align:center;
+  box-shadow:0 0 60px rgba(77,208,225,0.4);
+  pointer-events:none;white-space:nowrap;
+}
+
+/* Whale spout */
+@keyframes spoutUp{
+  0%{transform:translateY(0) scaleY(0.5);opacity:0}
+  30%{transform:translateY(-120px) scaleY(1);opacity:1}
+  100%{transform:translateY(-200px) scaleY(0.3);opacity:0}
+}
+.whale-spout{
+  position:absolute;font-size:1.5rem;
+  animation:spoutUp 1.5s ease-out forwards;
+  pointer-events:none;
+}
+
+/* 🌅 sunrise overlay */
+.sunrise-overlay{
+  position:fixed;inset:0;z-index:995;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,100,0,0.4),rgba(255,200,0,0.2),transparent 60%);
+  opacity:0;transition:opacity 1s;
+}
+.sunrise-overlay.active{opacity:1}
+
+/* 🌙 moonlight */
+.moon-overlay{
+  position:fixed;inset:0;z-index:994;pointer-events:none;
+  background:rgba(0,20,60,0.5);transition:opacity 2s;
+}
+.moon-overlay.active{opacity:1}
+
+/* Abyss overlay */
+.abyss-overlay{
+  position:fixed;inset:0;z-index:993;pointer-events:none;
+  background:rgba(0,0,0,0.8);opacity:0;transition:opacity 2s;
+}
+.abyss-overlay.active{opacity:1}
+
+/* 🦈 fin circling */
+.fin-path{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:990;
+  font-size:2rem;
+  animation:finCircle 4s linear forwards;
+}
+@keyframes finCircle{
+  0%{transform:translate(0,0) rotate(0deg)}
+  25%{transform:translate(90vw,10vh) rotate(90deg)}
+  50%{transform:translate(80vw,80vh) rotate(180deg)}
+  75%{transform:translate(10vw,70vh) rotate(270deg)}
+  100%{transform:translate(0,0) rotate(360deg)}
+}
+
+/* 🌟 star burst */
+@keyframes starBurst{
+  0%{transform:scale(0) rotate(0deg);opacity:0}
+  50%{transform:scale(2) rotate(180deg);opacity:1}
+  100%{transform:scale(0) rotate(360deg);opacity:0}
+}
+.star-burst{animation:starBurst 1s ease-out forwards}
+
+/* 💫 konami code area */
+.konami-area{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;font-size:3rem;flex-direction:column;gap:10px}
+
+/* 🫧 bubble frenzy */
+.bubble-frenzy .bubble{animation-duration:0.5s!important}
+
+/* 🌈 prismatic */
+@keyframes prismatic{
+  0%{filter:hue-rotate(0deg)}
+  100%{filter:hue-rotate(360deg)}
+}
+.prismatic-active{animation:prismatic 3s linear infinite}
+.prismatic-overlay{
+  position:fixed;inset:0;z-index:992;pointer-events:none;
+  background:linear-gradient(45deg,rgba(255,0,0,0.1),rgba(255,165,0,0.1),rgba(255,255,0,0.1),rgba(0,255,0,0.1),rgba(0,0,255,0.1),rgba(128,0,128,0.1));
+  mix-blend-mode:screen;opacity:0;transition:opacity 1s;
+}
+.prismatic-overlay.active{opacity:1}
+
+/* 🐙 octopus arms wave */
+.octopus-container{position:relative;display:inline-block}
+.arm{
+  position:absolute;width:30px;height:60px;
+  background:linear-gradient(180deg,#e91e63,#ad1457);
+  border-radius:0 0 15px 15px;
+  transform-origin:top center;
+  transition:transform 0.3s;
+}
+.arm-wave{animation:armWave 0.4s ease-in-out infinite alternate}
+@keyframes armWave{
+  0%{transform:rotate(-20deg)}
+  100%{transform:rotate(20deg)}
+}
+
+/* Pearl multiply */
+.pearl-cluster{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:3rem;z-index:900;pointer-events:none;
+  animation:pearlPop 0.5s ease-out forwards;
+}
+@keyframes pearlPop{
+  0%{transform:translate(-50%,-50%) scale(0)}
+  60%{transform:translate(-50%,-50%) scale(1.3)}
+  100%{transform:translate(-50%,-50%) scale(1)}
+}
+
+/* 🪝 anchor rise */
+@keyframes anchorRise{
+  0%{transform:translateY(200px)}
+  100%{transform:translateY(0)}
+}
+
+/* ⚓ lighthouse beam */
+.lighthouse-beam{
+  position:fixed;top:0;left:50%;width:200px;height:100vh;
+  background:linear-gradient(180deg,rgba(255,255,200,0.3),transparent);
+  transform-origin:top center;
+  pointer-events:none;z-index:5;
+  animation:lighthouseSweep 3s ease-in-out infinite;
+}
+@keyframes lighthouseSweep{
+  0%,100%{transform:rotate(-30deg)}
+  50%{transform:rotate(30deg)}
+}
+.lighthouse-beam-intense{
+  background:linear-gradient(180deg,rgba(255,255,200,0.6),transparent)!important;
+}
+
+/* 🐢 turtle race */
+@keyframes turtleRace{
+  0%{transform:translateX(-100px) rotate(0deg)}
+  100%{transform:translateX(100vw) rotate(360deg)}
+}
+.turtle-race{animation:turtleRace 5s linear forwards}
+
+/* 🦀 crab scuttle */
+@keyframes crabScuttle{
+  0%{transform:translateX(0) scaleX(1)}
+  25%{transform:translateX(-30px) scaleX(-1)}
+  50%{transform:translateX(30px) scaleX(-1)}
+  75%{transform:translateX(-30px) scaleX(1)}
+  100%{transform:translateX(100px) scaleX(1)}
+}
+.crab-scuttle{animation:crabScuttle 1s ease-in-out forwards}
+
+/* 🦈 ROAR text */
+@keyframes roarText{
+  0%{transform:scale(0.5) translateX(-50%);opacity:0}
+  30%{transform:scale(1.3) translateX(-50%);opacity:1}
+  70%{transform:scale(1) translateX(-50%);opacity:1}
+  100%{transform:scale(1.5) translateX(-50%);opacity:0}
+}
+.roar-text{
+  position:fixed;top:30%;left:50%;
+  font-size:3rem;font-weight:900;color:#ff4444;
+  text-shadow:0 0 20px rgba(255,0,0,0.8);
+  z-index:900;pointer-events:none;
+  animation:roarText 1.5s ease-out forwards;
+}
+
+/* 🎵 music notes */
+@keyframes musicFloat{
+  0%{transform:translateY(0) rotate(0deg);opacity:1}
+  100%{transform:translateY(-100px) rotate(20deg);opacity:0}
+}
+.music-note{
+  position:absolute;font-size:1.2rem;
+  animation:musicFloat 1.5s ease-out forwards;
+  pointer-events:none;
+}
+
+/* 🌊🌊🌊 tide */
+@keyframes tideChange{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-20px)}
+}
+.tide-active .sand{animation:tideChange 2s ease-in-out infinite}
+
+/* 🦈🪝⛵ net break */
+@keyframes netBreak{
+  0%{transform:translateX(0);opacity:1}
+  50%{transform:translateX(-20px) rotate(-10deg)}
+  100%{transform:translateX(50px) rotate(10deg);opacity:0}
+}
+.net-break{animation:netBreak 1s ease-out forwards}
+
+/* 📍 invisible fish */
+.invisible-fish{
+  position:fixed;font-size:1.5rem;
+  opacity:0.03;
+  cursor:pointer;
+  z-index:10;
+  transition:opacity 0.3s;
+}
+.invisible-fish:hover{opacity:0.15!important}
+
+/* Secret found */
+.secret-found{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:2rem;z-index:9999;
+  text-align:center;
+  pointer-events:none;
+}
+@keyframes secretReveal{
+  0%{transform:translate(-50%,-50%) scale(0);opacity:0}
+  30%{transform:translate(-50%,-50%) scale(1.5);opacity:1}
+  70%{transform:translate(-50%,-50%) scale(1.2);opacity:1}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0}
+}
+.secret-found{animation:secretReveal 3s ease-out forwards}
+
+/* Fish gathering */
+@keyframes fishGather{
+  0%{transform:translate(0,0)}
+  100%{transform:translate(var(--gx,0),var(--gy,0))}
+}
+.fish-gather{animation:fishGather 1s ease-out forwards!important}
+
+/* Earthquake */
+@keyframes earthquake{
+  0%,100%{transform:translate(0,0)}
+  10%{transform:translate(-5px,3px)}
+  20%{transform:translate(5px,-3px)}
+  30%{transform:translate(-3px,5px)}
+  40%{transform:translate(3px,-5px)}
+  50%{transform:translate(-5px,-3px)}
+  60%{transform:translate(5px,3px)}
+  70%{transform:translate(-3px,-5px)}
+  80%{transform:translate(3px,5px)}
+  90%{transform:translate(-5px,3px)}
+}
+.earthquake-shake{animation:earthquake 0.5s ease-in-out}
+
+/* Fish scatter */
+@keyframes fishScatter{
+  0%{transform:translate(0,0) rotate(0deg)}
+  100%{transform:translate(var(--sx,50px),var(--sy,-30px)) rotate(var(--sr,30deg))}
+}
+.fish-scatter{animation:fishScatter 0.8s ease-out forwards!important}
+
+/* Whirlpool */
+@keyframes whirlpoolSpin{
+  0%{transform:rotate(0deg) scale(1)}
+  100%{transform:rotate(720deg) scale(0)}
+}
+.whirlpool{
+  position:fixed;top:50%;left:50%;
+  width:400px;height:400px;margin:-200px 0 0 -200px;
+  border-radius:50%;
+  border:3px solid rgba(77,208,225,0.4);
+  z-index:996;pointer-events:none;
+  animation:whirlpoolSpin 3s linear forwards;
+}
+
+/* Rainbow trail */
+@keyframes rainbowTrail{
+  0%{background-position:0% 50%}
+  100%{background-position:200% 50%}
+}
+.rainbow-trail{
+  position:fixed;inset:0;z-index:991;pointer-events:none;
+  background:linear-gradient(90deg,red,orange,yellow,green,blue,indigo,violet,red);
+  background-size:200% 100%;
+  opacity:0.15;mix-blend-mode:screen;
+  animation:rainbowTrail 2s linear forwards;
+}
+
+/* 🐟 fish yawn */
+@keyframes fishYawn{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.2)}
+}
+.fish-yawn{animation:fishYawn 2s ease-in-out}
+
+/* Ancient fish */
+@keyframes ancientAwaken{
+  0%{transform:scale(0) rotate(-180deg);opacity:0}
+  50%{transform:scale(2) rotate(0deg);opacity:1}
+  80%{transform:scale(1.5);opacity:1}
+  100%{transform:scale(0);opacity:0}
+}
+.ancient-fish{animation:ancientAwaken 5s ease-out forwards}
+
+/* Welcome back */
+@keyframes welcomeFade{
+  0%{transform:translate(-50%,-50%) scale(0.8);opacity:0}
+  30%{transform:translate(-50%,-50%) scale(1.05);opacity:1}
+  70%{transform:translate(-50%,-50%) scale(1);opacity:1}
+  100%{transform:translate(-50%,-50%) scale(0.9);opacity:0}
+}
+.welcome-msg{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:rgba(0,20,50,0.95);border:2px solid #4dd0e1;
+  border-radius:24px;padding:30px 60px;
+  font-size:1.5rem;color:#80deea;z-index:9999;text-align:center;
+  box-shadow:0 0 80px rgba(77,208,225,0.5);
+  animation:welcomeFade 4s ease-out forwards;
+  pointer-events:none;
+}
+
+/* Fish escape drag */
+@keyframes fishEscape{
+  0%{transform:translate(0,0)}
+  100%{transform:translate(var(--ex,200px),var(--ey,-100px)) rotate(var(--er,45deg));opacity:0}
+}
+.fish-escape{animation:fishEscape 0.8s ease-in forwards!important}
+
+/* Offline/online fish */
+.fish-hide{opacity:0.1!important;transition:opacity 1s}
+.fish-celebrate{animation:fishCelebrate 1s ease-in-out infinite alternate!important}
+@keyframes fishCelebrate{
+  0%{transform:translateY(0) rotate(-5deg)}
+  100%{transform:translateY(-20px) rotate(5deg)}
+}
+
+/* Mobile double tap */
+.tap-zone{position:fixed;inset:0;z-index:998;display:none}
+
+/* Secret menu */
+.secret-menu{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:rgba(0,10,30,0.98);border:2px solid #4dd0e1;
+  border-radius:20px;padding:30px 50px;z-index:9999;text-align:center;
+  box-shadow:0 0 100px rgba(77,208,225,0.4);
+  pointer-events:none;
+}
+.secret-menu h2{color:#4dd0e1;margin-bottom:10px;font-size:1.2rem}
+.secret-menu p{color:#80deea;font-size:0.85rem;line-height:1.8}
+
+/* Pause overlay */
+.pause-overlay{
+  position:fixed;inset:0;z-index:988;
+  background:rgba(0,0,20,0.5);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;color:#4dd0e1;
+  pointer-events:none;
+  opacity:0;transition:opacity 0.3s;
+}
+.pause-overlay.active{opacity:1}
+
+/* 🕐⏰ Clock display */
+.clock-display{
+  position:fixed;top:10px;right:10px;
+  font-size:0.7rem;color:rgba(77,208,225,0.4);
+  z-index:10;
+}
+
+/* Midnight mode */
+.midnight-overlay{
+  position:fixed;inset:0;z-index:989;pointer-events:none;
+  background:radial-gradient(ellipse at top,#1a0033,transparent 60%);
+  opacity:0;transition:opacity 2s;
+}
+.midnight-overlay.active{opacity:1}
+
+/* Full moon */
+.fullmoon-overlay{
+  position:fixed;top:-100px;right:10%;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,#ffffcc,#fff5b3,transparent);
+  box-shadow:0 0 60px rgba(255,255,200,0.4);
+  z-index:990;pointer-events:none;
+  opacity:0;transition:opacity 2s;
+}
+.fullmoon-overlay.active{opacity:1}
+
+/* Day/night toggle */
+.daynight-overlay{
+  position:fixed;inset:0;z-index:987;pointer-events:none;
+  background:rgba(0,0,20,0);transition:background 2s;
+}
+.daynight-overlay.night{background:rgba(0,0,30,0.4)}
+
+/* Hidden nav hint */
+.nav-hint{
+  position:fixed;bottom:60px;left:50%;transform:translateX(-50%);
+  font-size:0.7rem;color:rgba(77,208,225,0.4);
+  z-index:10;cursor:pointer;
+}
+
+/* Fish evolution */
+.fish-evolving{
+  filter:hue-rotate(calc(var(--hue,0deg))) saturate(2) brightness(1.2)!important;
+  transition:filter 0.5s;
+}
+
+/* Loading */
+.loading-hint{
+  position:fixed;bottom:10px;right:10px;
+  font-size:0.6rem;color:rgba(77,208,225,0.3);
+  z-index:10;
+}
+</style>
+</head>
+<body>
+
+<div class="bubbles" id="bubbles"></div>
+<div class="fish-bg" id="fishBg"></div>
+<div class="ocean-floor"></div>
+<div class="sand" id="sand"></div>
+<div class="wave-deco"></div>
+<div class="scroll-zone" id="scrollZone">SCROLL TO EXPLORE</div>
+
+<div class="effect-layer" id="effectLayer"></div>
+<div class="sunrise-overlay" id="sunriseOverlay"></div>
+<div class="moon-overlay" id="moonOverlay"></div>
+<div class="abyss-overlay" id="abyssOverlay"></div>
+<div class="prismatic-overlay" id="prismaticOverlay"></div>
+<div class="midnight-overlay" id="midnightOverlay"></div>
+<div class="fullmoon-overlay" id="fullmoonOverlay"></div>
+<div class="daynight-overlay" id="daynightOverlay"></div>
+<div class="pause-overlay" id="pauseOverlay">⏸ PAUSED</div>
+
+<div class="title-wrap" id="titleWrap">
+  <div class="title" id="mainTitle">🐳 魚的秘密花園 🐳</div>
+  <div class="subtitle">THE SECRET GARDEN OF FISH · 100 EASTER EGGS</div>
+</div>
+
+<div class="elements-row" id="elementsRow">
+  <div class="ocean-el" id="el-whale" title="🐳 Whale">🐳</div>
+  <div class="ocean-el" id="el-octopus" title="🐙 Octopus">🐙</div>
+  <div class="ocean-el" id="el-crab" title="🦀 Crab">🦀</div>
+  <div class="ocean-el" id="el-jelly" title="🪼 Jellyfish">🪼</div>
+  <div class="ocean-el" id="el-shark" title="🦈 Shark">🦈</div>
+  <div class="ocean-el" id="el-dolphin" title="🐬 Dolphin">🐬</div>
+  <div class="ocean-el" id="el-turtle" title="🐢 Turtle">🐢</div>
+  <div class="ocean-el" id="el-starfish" title="⭐ Starfish">⭐</div>
+  <div class="ocean-el" id="el-fishnet" title="🥅 Fishing Net">🥅</div>
+  <div class="ocean-el" id="el-anchor" title="⚓ Anchor" style="position:relative">⚓</div>
+  <div class="ocean-el" id="el-wheel" title="☸️ Ship Wheel">☸️</div>
+  <div class="ocean-el" id="el-pearl" title="🔮 Pearl">🔮</div>
+  <div class="ocean-el" id="el-sharkfin" title="🦈 Fin">🦈</div>
+  <div class="ocean-el" id="el-coral" title="🪸 Coral">🪸</div>
+  <div class="ocean-el" id="el-lighthouse" title="🗼 Lighthouse">🗼</div>
+  <div class="ocean-el" id="el-boat" title="⛵ Boat">⛵</div>
+  <div class="ocean-el" id="el-seaweed" title="🌿 Seaweed">🌿</div>
+  <div class="ocean-el" id="el-waves" title="🌊 Wave (click 7x)">🌊</div>
+</div>
+
+<div class="ocean-el" id="tapZone" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:0;opacity:0;pointer-events:all;width:200px;height:200px">D</div>
+
+<div class="cards-section">
+  <div class="cards-grid" id="cardsGrid"></div>
+</div>
+
+<div class="invisible-fish" id="invisibleFish" style="top:72%;left:15%">🐟</div>
+<div class="clock-display" id="clockDisplay"></div>
+<div class="loading-hint">Try: fish · whale · bubbles · treasure · rainbow · deep · moon · sun</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// 100 EASTER EGGS — Fish Egg Hunt
+// ═══════════════════════════════════════════════
+
+const $ = id => document.getElementById(id);
+const $$ = sel => document.querySelectorAll(sel);
+const el = (tag, cls, txt) => {
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(txt) e.textContent = txt;
+  return e;
+};
+
+// Fish data
+const fishData = [
+  {icon:'🐠',name:'小丑魚',sub:'Nemo',count:'CM · 7'},
+  {icon:'🐟',name:'鯛魚',sub:'Red Snapper',count:'CM · 5'},
+  {icon:'🐡',name:'河豚',sub:'Pufferfish',count:'CM · 4'},
+  {icon:'🐙',name:'章魚',sub:'Octopus',count:'CM · 8'},
+  {icon:'🦑',name:'大王酸漿魷',sub:'Giant Squid',count:'CM · 3'},
+  {icon:'🦈',name:'大白鯊',sub:'Great White',count:'CM · 6'},
+  {icon:'🐬',name:'海豚',sub:'Bottlenose',count:'CM · 5'},
+  {icon:'🐢',name:'海龜',sub:'Green Sea',count:'CM · 4'},
+  {icon:'🦀',name:'螃蟹',sub:'Red King Crab',count:'CM · 6'},
+  {icon:'🦞',name:'龍蝦',sub:'Lobster',count:'CM · 2'},
+  {icon:'🪼',name:'水母',sub:'Moon Jelly',count:'CM · 9'},
+  {icon:'⭐',name:'海星',sub:'Starfish',count:'CM · 5'},
+  {icon:'🐳',name:'藍鯨',sub:'Blue Whale',count:'CM · 1'},
+  {icon:'🦭',name:'海豹',sub:'Seal',count:'CM · 4'},
+  {icon:'🐙',name:'墨魚',sub:'Cuttlefish',count:'CM · 7'},
+  {icon:'🦑',name:'燈籠魚',sub:'Anglerfish',count:'CM · 3'},
+  {icon:'🐠',name:'神仙魚',sub:'Angelfish',count:'CM · 6'},
+  {icon:'🐡',name:'刺魨',sub:'Porcupinefish',count:'CM · 4'},
+  {icon:'🦈',name:'鯊魚',sub:'Hammerhead',count:'CM · 5'},
+  {icon:'🐟',name:'鮪魚',sub:'Tuna',count:'CM · 8'},
+  {icon:'🐠',name:'蝴蝶魚',sub:'Butterflyfish',count:'CM · 5'},
+  {icon:'🦑',name:'魷魚',sub:'Squid',count:'CM · 6'},
+  {icon:'🪸',name:'珊瑚',sub:'Coral Reef',count:'CM · 10'},
+  {icon:'🐢',name:'棱皮龜',sub:'Leatherback',count:'CM · 2'},
+  {icon:'🦭',name:'海獅',sub:'Sea Lion',count:'CM · 4'},
+];
+
+// Build cards
+fishData.forEach((f,i) => {
+  const card = el('div','fish-card');
+  card.innerHTML = `<span class="icon">${f.icon}</span><div class="name">${f.name}</div><div class="sub">${f.sub}</div><div class="count">${f.count}</div>`;
+  card.dataset.index = i;
+  $('cardsGrid').appendChild(card);
+});
+
+// ─── 1. Click title → whale splash ───
+let titleClicks = 0;
+let titleClickTimer;
+$('mainTitle').addEventListener('click', () => {
+  titleClicks++;
+  clearTimeout(titleClickTimer);
+  titleClickTimer = setTimeout(() => titleClicks = 0, 600);
+  if(titleClicks >= 5) {
+    titleClicks = 0;
+    showEffect('🐳💦💦💦💦💦', 'top:20%;left:30%;font-size:3rem', 2500);
+    return;
+  }
+  const spout = el('div','','💦');
+  spout.style.cssText = `position:fixed;top:${50+Math.random()*20}%;left:${20+Math.random()*60}%;font-size:1.5rem;z-index:900;pointer-events:none;animation:bubbleRise 1.5s ease-out forwards`;
+  document.body.appendChild(spout);
+  setTimeout(()=>spout.remove(), 1600);
+});
+
+// ─── 2. Double-click anywhere → fish swims ───
+document.addEventListener('dblclick', e => {
+  if(e.target.closest('.ocean-el') || e.target.closest('.fish-card')) return;
+  showEffect('🐟➡️🐟➡️🐟', `top:${e.clientY}px;left:${e.clientX}px;font-size:2rem`, 2000);
+});
+
+// ─── 3. Triple-click main fish card → rainbow fish ───
+let cardClickCount = {};
+document.addEventListener('click', e => {
+  const card = e.target.closest('.fish-card');
+  if(!card) return;
+  const idx = card.dataset.index;
+  cardClickCount[idx] = (cardClickCount[idx]||0) + 1;
+  setTimeout(() => cardClickCount[idx] = 0, 800);
+  if(cardClickCount[idx] >= 3) {
+    cardClickCount[idx] = 0;
+    card.classList.add('rainbow-active');
+    setTimeout(()=>card.classList.remove('rainbow-active'), 3000);
+    showMsg('🌈 Rainbow Fish!');
+  }
+});
+
+// ─── 4. Long-press fish card → grow ───
+let longPressTimer;
+document.addEventListener('mousedown', e => {
+  const card = e.target.closest('.fish-card');
+  if(!card) return;
+  longPressTimer = setTimeout(() => {
+    card.style.transform = 'scale(1.5)';
+    card.style.zIndex = '50';
+    showMsg('🔍 放大鏡模式！');
+    setTimeout(()=>{card.style.transform='';card.style.zIndex='';},3000);
+  }, 500);
+});
+document.addEventListener('mouseup', () => clearTimeout(longPressTimer));
+
+// ─── 5. Click wave 7 times → tsunami ───
+let waveClicks = 0;
+$('el-waves').addEventListener('click', () => {
+  waveClicks++;
+  if(waveClicks >= 7) {
+    waveClicks = 0;
+    const wave = el('div','','🌊');
+    wave.className = 'tsunami-wave';
+    document.body.appendChild(wave);
+    setTimeout(()=>wave.remove(), 2500);
+  }
+});
+
+// ─── 7. Click bubble → pop ───
+document.addEventListener('click', e => {
+  if(!e.target.classList.contains('bubble')) return;
+  e.target.classList.add('popping');
+  showEffect('🫧 泡泡！', `top:${e.clientY}px;left:${e.clientX}px;font-size:1rem`, 1500);
+  setTimeout(()=>e.target.remove(), 400);
+});
+
+// ─── 8. Click seaweed → dance ───
+$('el-seaweed').addEventListener('click', () => {
+  $('el-seaweed').style.transition = 'transform 0.2s';
+  let d = 0;
+  const iv = setInterval(() => {
+    $('el-seaweed').style.transform = `rotate(${Math.sin(d++)*30}deg)`;
+    if(d > 20) {clearInterval(iv); $('el-seaweed').style.transform = '';}
+  }, 100);
+});
+
+// ─── 9. Click sand → treasure ───
+$('sand').addEventListener('click', () => {
+  const chest = el('div','','💰✨💎✨💰');
+  chest.className = 'chest-burst';
+  document.body.appendChild(chest);
+  setTimeout(()=>chest.remove(), 2000);
+});
+
+// ─── 10. Click octopus → arms wave ───
+$('el-octopus').addEventListener('click', () => {
+  const icons = ['💪','💪','💪','💪','💪','💪','💪','💪'];
+  icons.forEach((icon,i) => {
+    const arm = el('div','',icon);
+    arm.style.cssText = `position:fixed;top:${40+i*5}%;left:${20+i*5}%;font-size:1.2rem;z-index:900;pointer-events:none;animation:armWave 0.4s ease-in-out ${i*0.05}s infinite alternate`;
+    document.body.appendChild(arm);
+    setTimeout(()=>arm.remove(), 3000);
+  });
+});
+
+// ─── 11. Click crab → scuttle ───
+$('el-crab').addEventListener('click', () => {
+  $('el-crab').classList.add('crab-scuttle');
+  setTimeout(()=>$('el-crab').classList.remove('crab-scuttle'), 1200);
+});
+
+// ─── 12. Click jellyfish → electric shock ───
+$('el-jelly').addEventListener('click', () => {
+  for(let i=0;i<8;i++){
+    const bolt = el('div','','⚡');
+    bolt.style.cssText = `position:fixed;top:${20+i*8}%;left:${20+i*8}%;font-size:1.5rem;z-index:900;pointer-events:none;animation:musicFloat ${0.8+i*0.1}s ease-out forwards`;
+    document.body.appendChild(bolt);
+    setTimeout(()=>bolt.remove(), 1500);
+  }
+  showMsg('⚡ 電擊！');
+});
+
+// ─── 13. Click shark → roar ───
+$('el-shark').addEventListener('click', () => {
+  const roar = el('div','','🦈 咆哮！');
+  roar.className = 'roar-text';
+  document.body.appendChild(roar);
+  setTimeout(()=>roar.remove(), 1800);
+});
+
+// ─── 14. Click dolphin → sing ───
+$('el-dolphin').addEventListener('click', e => {
+  for(let i=0;i<7;i++){
+    const note = el('div','','🎵');
+    note.className = 'music-note';
+    note.style.cssText = `left:${e.clientX + (Math.random()-0.5)*60}px;top:${e.clientY}px;animation-delay:${i*0.2}s`;
+    document.body.appendChild(note);
+    setTimeout(()=>note.remove(), 2000);
+  }
+  showMsg('🐬 歌聲！');
+});
+
+// ─── 15. Click turtle → star ───
+$('el-turtle').addEventListener('click', () => {
+  const star = el('div','','⭐🌟⭐');
+  star.className = 'star-burst';
+  star.style.cssText = 'position:fixed;top:40%;left:50%;font-size:2rem;z-index:900;pointer-events:none';
+  document.body.appendChild(star);
+  setTimeout(()=>star.remove(), 1500);
+});
+
+// ─── 16. Click starfish → regenerate arms ───
+$('el-starfish').addEventListener('click', () => {
+  for(let i=0;i<5;i++){
+    const arm = el('div','','✴️');
+    arm.style.cssText = `position:fixed;top:${30+i*8}%;left:${30+i*5}%;font-size:1.2rem;z-index:900;pointer-events:none;animation:armWave 0.5s ease-in-out ${i*0.1}s infinite alternate`;
+    document.body.appendChild(arm);
+    setTimeout(()=>arm.remove(), 4000);
+  }
+});
+
+// ─── 17. Click whale → water spout ───
+$('el-whale').addEventListener('click', e => {
+  const spout = el('div','','💨💦');
+  spout.className = 'whale-spout';
+  spout.style.cssText = `left:${e.clientX}px;top:${e.clientY-20}px`;
+  document.body.appendChild(spout);
+  setTimeout(()=>spout.remove(), 1800);
+});
+
+// ─── 18. Click fishing net → break ───
+$('el-fishnet').addEventListener('click', () => {
+  $('el-fishnet').classList.add('net-break');
+  showEffect('🐟🐟🐟 逃離！', 'top:40%;left:30%;font-size:1.5rem', 2000);
+  setTimeout(()=>$('el-fishnet').classList.remove('net-break'), 1200);
+});
+
+// ─── 19. Click anchor → rise ───
+$('el-anchor').addEventListener('click', () => {
+  $('el-anchor').style.transition = 'transform 3s ease-out';
+  $('el-anchor').style.transform = 'translateY(-200px)';
+  setTimeout(()=>{$('el-anchor').style.transform = '';}, 5000);
+});
+
+// ─── 20. Click ship wheel → spin ───
+let wheelClicks = 0;
+$('el-wheel').addEventListener('click', () => {
+  wheelClicks++;
+  $('el-wheel').style.transition = 'transform 0.5s ease-out';
+  $('el-wheel').style.transform = `rotate(${wheelClicks * 90}deg)`;
+});
+
+// ─── 21. Click pearl → multiply ───
+$('el-pearl').addEventListener('click', () => {
+  for(let i=0;i<6;i++){
+    const pearl = el('div','','🔮');
+    pearl.className = 'pearl-cluster';
+    pearl.style.cssText += `animation-delay:${i*0.15}s;position:fixed;top:${30+i*5}%;left:${30+i*8}%`;
+    document.body.appendChild(pearl);
+    setTimeout(()=>pearl.remove(), 2000);
+  }
+});
+
+// ─── 22. Click shark fin → circle ───
+let finActive = false;
+$('el-sharkfin').addEventListener('click', () => {
+  if(finActive) return;
+  finActive = true;
+  const fin = el('div','','🦈');
+  fin.className = 'fin-path';
+  document.body.appendChild(fin);
+  setTimeout(()=>{fin.remove();finActive=false;}, 4500);
+});
+
+// ─── 23. Click coral → bloom ───
+$('el-coral').addEventListener('click', () => {
+  for(let i=0;i<8;i++){
+    const bloom = el('div','','🌸🌺🌸🌺🌸🌺🌸🌺');
+    bloom.style.cssText = `position:fixed;top:${30+i*6}%;left:${20+i*6}%;font-size:1.2rem;z-index:900;pointer-events:none;animation:armWave 0.6s ease-in-out ${i*0.1}s infinite alternate`;
+    document.body.appendChild(bloom);
+    setTimeout(()=>bloom.remove(), 4000);
+  }
+});
+
+// ─── 24. Click lighthouse → beam sweep ───
+$('el-lighthouse').addEventListener('click', () => {
+  let beam = el('div','');
+  beam.className = 'lighthouse-beam lighthouse-beam-intense';
+  document.body.appendChild(beam);
+  setTimeout(()=>beam.remove(), 5000);
+});
+
+// ─── 25. Click boat → rock ───
+$('el-boat').addEventListener('click', () => {
+  $('el-boat').style.transition = 'transform 0.2s';
+  let r = 0;
+  const iv = setInterval(() => {
+    $('el-boat').style.transform = `rotate(${Math.sin(r++)*15}deg)`;
+    if(r > 15) {clearInterval(iv); $('el-boat').style.transform = '';}
+  }, 100);
+});
+
+// ─── 26-40. Keyboard easter eggs ───
+const keyMap = {
+  f: () => { document.querySelectorAll('.fish-swimmer').forEach(f => f.style.animationDuration = '2s'); setTimeout(()=>document.querySelectorAll('.fish-swimmer').forEach(f=>f.style.animationDuration=''),3000); },
+  w: () => showEffect('🐳 鯨魚來了！', 'top:20%;left:20%;font-size:2rem', 2500),
+  b: () => document.body.classList.add('bubble-frenzy') || (document.body.classList.add('bubble-frenzy'), setTimeout(()=>document.body.classList.remove('bubble-frenzy'),3000)),
+  d: () => $('daynightOverlay').classList.toggle('night'),
+  m: () => showMsg('🔇 靜音模式 (這是假的)'),
+  s: () => document.querySelectorAll('.fish-swimmer').forEach(f=>f.style.animationDuration='8s'),
+  h: () => showMsg('🐟 Hello, hunter!'),
+  c: () => {
+    document.querySelectorAll('.fish-swimmer').forEach((f,i) => {
+      f.style.setProperty('--gx',(Math.random()-0.5)*100+'px');
+      f.style.setProperty('--gy',(Math.random()-0.5)*100+'px');
+      f.classList.add('fish-gather');
+      setTimeout(()=>f.classList.remove('fish-gather'),1500);
+    });
+  },
+  p: () => {
+    const paused = $('pauseOverlay').classList.toggle('active');
+    document.querySelectorAll('.fish-swimmer,.bubble').forEach(el => el.style.animationPlayState = paused ? 'paused' : 'running');
+  },
+  r: () => { document.body.classList.add('rainbow-active'); setTimeout(()=>document.body.classList.remove('rainbow-active'),4000); },
+  t: () => {
+    const t = el('div','','🐢');
+    t.className = 'turtle-race';
+    t.style.cssText = 'position:fixed;top:60%;font-size:2rem;z-index:900;pointer-events:none';
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(), 5500);
+  },
+  o: () => {
+    for(let i=0;i<8;i++){
+      const arm = el('div','','💪');
+      arm.style.cssText = `position:fixed;top:${20+i*8}%;left:${10+i*5}%;font-size:1.5rem;z-index:900;pointer-events:none;animation:armWave 0.3s ease-in-out ${i*0.05}s infinite alternate`;
+      document.body.appendChild(arm);
+      setTimeout(()=>arm.remove(),3000);
+    }
+  },
+  j: () => { $('el-jelly').style.filter = 'brightness(2) drop-shadow(0 0 20px #fff)'; setTimeout(()=>$('el-jelly').style.filter='',3000); },
+  k: () => showMsg('⬆️⬆️⬇️⬇️⬅️➡️⬅️➡️🅱️🅰️ 秘密？'),
+  l: () => {
+    let beam = el('div','');
+    beam.className = 'lighthouse-beam lighthouse-beam-intense';
+    document.body.appendChild(beam);
+    setTimeout(()=>beam.remove(), 4000);
+  },
+};
+
+let konamiStep = 0;
+const konamiSeq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','KeyB','KeyA'];
+document.addEventListener('keydown', e => {
+  // 26-40
+  if(e.key.length === 1 && keyMap[e.key]) { keyMap[e.key](); return; }
+  if(e.code === konamiSeq[konamiStep]) {
+    konamiStep++;
+    if(konamiStep === konamiSeq.length) {
+      konamiStep = 0;
+      showMsg('🎮 KONAMI CODE! +30 Lives!');
+    }
+  } else konamiStep = 0;
+
+  // 71-80 type easter eggs
+  if(e.key === 'Enter' || e.key === ' ') return;
+  typeBuffer += e.key.toLowerCase();
+  clearTimeout(typeTimer);
+  typeTimer = setTimeout(() => {
+    if(typeBuffer.includes('fish')) { showEffect('🐟🐟🐟🐟🐟🐟🐟🐟🐟🐟', 'top:30%;left:10%;font-size:1.5rem', 3000); typeBuffer = ''; }
+    if(typeBuffer.includes('whale')) { showEffect('🐳🐋🐳🐋🐳🐋🐳', 'top:25%;left:15%;font-size:2rem', 3000); typeBuffer = ''; }
+    if(typeBuffer.includes('bubbles')) { document.body.classList.add('bubble-frenzy'); setTimeout(()=>document.body.classList.remove('bubble-frenzy'),3000); typeBuffer=''; }
+    if(typeBuffer.includes('treasure')) { const c=el('div','','💰💎✨💰💎');c.className='chest-burst';document.body.appendChild(c);setTimeout(()=>c.remove(),2500);typeBuffer=''; }
+    if(typeBuffer.includes('deep')) { $('abyssOverlay').classList.add('active'); setTimeout(()=>$('abyssOverlay').classList.remove('active'),5000); typeBuffer=''; }
+    if(typeBuffer.includes('surface')) { $('sunriseOverlay').classList.add('active'); setTimeout(()=>$('sunriseOverlay').classList.remove('active'),5000); typeBuffer=''; }
+    if(typeBuffer.includes('rainbow')) { $('prismaticOverlay').classList.add('active'); setTimeout(()=>$('prismaticOverlay').classList.remove('active'),4000); typeBuffer=''; }
+    if(typeBuffer.includes('star')) { for(let i=0;i<20;i++){const s=el('div','','⭐');s.style.cssText=`position:fixed;top:${Math.random()*80}%;left:${Math.random()*90}%;font-size:${0.8+Math.random()}rem;z-index:900;pointer-events:none;animation:starBurst 2s ease-out ${Math.random()}s forwards`;document.body.appendChild(s);setTimeout(()=>s.remove(),4000);} typeBuffer=''; }
+    if(typeBuffer.includes('moon')) { $('moonOverlay').classList.add('active'); $('fullmoonOverlay').classList.add('active'); setTimeout(()=>{$('moonOverlay').classList.remove('active');$('fullmoonOverlay').classList.remove('active');},6000); typeBuffer=''; }
+    if(typeBuffer.includes('sun')) { $('sunriseOverlay').classList.add('active'); setTimeout(()=>$('sunriseOverlay').classList.remove('active'),5000); typeBuffer=''; }
+    typeBuffer = '';
+  }, 800);
+});
+
+let typeBuffer = '';
+let typeTimer;
+
+// ─── 41. Scroll to bottom → deep sea ───
+let lastScrollY = 0;
+let scrollDir = [];
+window.addEventListener('scroll', () => {
+  const dy = window.scrollY - lastScrollY;
+  scrollDir.push(dy > 0 ? 1 : -1);
+  if(scrollDir.length > 10) scrollDir.shift();
+  lastScrollY = window.scrollY;
+
+  // 41
+  if(window.scrollY + window.innerHeight >= document.body.scrollHeight - 10) {
+    showEffect('🦑🐙🦑 深海生物出現！', 'top:40%;left:20%;font-size:1.5rem', 3000);
+  }
+  // 42 scroll up quickly
+  if(scrollDir.slice(-5).filter(d=>d<0).length >= 5 && dy < -20) {
+    document.querySelectorAll('.fish-swimmer').forEach(f => {
+      f.style.setProperty('--sx', (Math.random()-0.5)*200+'px');
+      f.style.setProperty('--sy', (Math.random()-0.5)*200+'px');
+      f.style.setProperty('--sr', (Math.random()-0.5)*60+'deg');
+      f.classList.add('fish-scatter');
+      setTimeout(()=>f.classList.remove('fish-scatter'),1200);
+    });
+    scrollDir = [];
+  }
+  // 43 scroll to 666px
+  if(Math.abs(window.scrollY - 666) < 5) {
+    const d = el('div','','👿 深淵惡魔魚！');
+    d.className = 'devil-fish';
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(), 4000);
+  }
+  // 48 scroll 50%
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  if(Math.abs(pct - 0.5) < 0.02) {
+    showMsg('📍 旅程中途！');
+  }
+});
+
+// ─── 45. Scroll while holding click → vortex ───
+let vortexShown = false;
+document.addEventListener('mousedown', e => {
+  if(e.button === 2) {
+    if(!vortexShown) {
+      vortexShown = true;
+      const v = el('div','');
+      v.className = 'vortex';
+      document.body.appendChild(v);
+      setTimeout(()=>v.remove(), 2500);
+      setTimeout(()=>vortexShown=false,5000);
+    }
+  }
+});
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// ─── 46. Scroll to top quickly → sunrise ───
+let scrollUpCount = 0;
+window.addEventListener('scroll', () => {
+  if(window.scrollY < 50 && scrollDir.slice(-5).filter(d=>d<0).length >= 5) {
+    $('sunriseOverlay').classList.add('active');
+    setTimeout(()=>$('sunriseOverlay').classList.remove('active'), 4000);
+  }
+});
+
+// ─── 47. Scroll back and forth 3x → whirlpool ───
+let scrollBackForth = 0;
+window.addEventListener('scroll', () => {
+  if(scrollDir.length >= 6) {
+    const last6 = scrollDir.slice(-6);
+    if(last6.filter(d=>d<0).length === 3 && last6.filter(d=>d>0).length === 3) {
+      scrollBackForth++;
+      if(scrollBackForth >= 2) {
+        scrollBackForth = 0;
+        const w = el('div','');
+        w.className = 'whirlpool';
+        document.body.appendChild(w);
+        setTimeout(()=>w.remove(), 3500);
+      }
+    }
+  }
+});
+
+// ─── 52. Scroll zigzag → rainbow trail ───
+let zigzagDir = [];
+window.addEventListener('scroll', () => {
+  const dy = window.scrollY - lastScrollY;
+  if(dy > 0) zigzagDir.push(1); else zigzagDir.push(-1);
+  if(zigzagDir.length > 8) zigzagDir.shift();
+  const seq = zigzagDir.join(',');
+  if(seq.includes('1,-1,1,-1') || seq.includes('-1,1,-1,1')) {
+    const r = el('div','');
+    r.className = 'rainbow-trail';
+    document.body.appendChild(r);
+    setTimeout(()=>r.remove(), 3000);
+    zigzagDir = [];
+  }
+});
+
+// ─── 56-70. Hover easter eggs ───
+const hoverData = {
+  'el-whale': () => showEffect('👀 鯨魚在看著你！', 'top:30%;left:40%;font-size:1rem', 1500),
+  'el-crab': () => { const c = el('div','','✌️'); c.style.cssText='position:fixed;top:50%;left:50%;font-size:2rem;z-index:900;pointer-events:none';document.body.appendChild(c);setTimeout(()=>c.remove(),1000); },
+  'el-jelly': () => { $('el-jelly').style.filter='brightness(1.5)'; setTimeout(()=>$('el-jelly').style.filter='',2000); },
+  'el-shark': () => { const s=el('div','','🦈');s.style.cssText='position:fixed;top:40%;left:40%;font-size:2rem;z-index:900;pointer-events:none;animation:armWave 0.5s ease-in-out infinite alternate';document.body.appendChild(s);setTimeout(()=>s.remove(),2000); },
+  'el-seaweed': () => { $('el-seaweed').style.transition='transform 0.3s';$('el-seaweed').style.transform='rotate(15deg)';setTimeout(()=>$('el-seaweed').style.transform='',1500); },
+  'el-coral': () => { $('el-coral').style.transform='scale(1.2)';$('el-coral').style.filter='brightness(1.3)';setTimeout(()=>{$('el-coral').style.transform='';$('el-coral').style.filter='';},1500); },
+  'el-lighthouse': () => { let b=el('div','');b.className='lighthouse-beam';document.body.appendChild(b);setTimeout(()=>b.remove(),3000); },
+  'el-boat': () => { $('el-boat').style.transition='transform 0.2s';$('el-boat').style.transform='translateY(-5px)';setTimeout(()=>$('el-boat').style.transform='',1000); },
+  'el-pearl': () => { $('el-pearl').style.filter='drop-shadow(0 0 15px #fff)';setTimeout(()=>$('el-pearl').style.filter='',2000); },
+};
+
+Object.entries(hoverData).forEach(([id, fn]) => {
+  const el2 = $(id);
+  if(!el2) return;
+  el2.addEventListener('mouseenter', fn);
+});
+
+// ─── 81-90. Time-based ───
+let elapsedStart = Date.now();
+
+// Fish yawn (10s)
+setTimeout(() => {
+  document.querySelectorAll('.fish-swimmer').forEach(f => {
+    f.classList.add('fish-yawn');
+    setTimeout(()=>f.classList.remove('fish-yawn'),2500);
+  });
+}, 10000);
+
+// Whale song (30s)
+setTimeout(() => {
+  showMsg('🐳 鯨魚之歌... 🐳');
+  for(let i=0;i<10;i++){
+    setTimeout(()=>{
+      const n=el('div','','🎵');
+      n.className='music-note';
+      n.style.cssText=`left:${20+i*7}%;top:50%;animation-delay:${i*0.2}s`;
+      document.body.appendChild(n);
+      setTimeout(()=>n.remove(),2500);
+    }, i*300);
+  }
+}, 30000);
+
+// Ancient fish (1min)
+setTimeout(() => {
+  const a = el('div','','🦑 遠古巨獸甦醒！');
+  a.className = 'ancient-fish';
+  a.style.cssText = 'position:fixed;top:30%;left:30%;font-size:2rem;z-index:900;pointer-events:none';
+  document.body.appendChild(a);
+  setTimeout(()=>a.remove(), 6000);
+}, 60000);
+
+// Welcome back (5min - checked via visibility)
+let lastHidden = 0;
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden) lastHidden = Date.now();
+  else if(Date.now() - lastHidden > 300000) {
+    const w = el('div','','🐳 歡迎回來！');
+    w.className = 'welcome-msg';
+    document.body.appendChild(w);
+    setTimeout(()=>w.remove(), 5000);
+  }
+});
+
+// Hourly tide
+setInterval(() => {
+  document.body.classList.add('tide-active');
+  setTimeout(()=>document.body.classList.remove('tide-active'),4000);
+}, 3600000);
+
+// ─── 91. Click+drag fish → escape ───
+let isDragging = false, dragTarget = null;
+document.addEventListener('mousedown', e => {
+  const card = e.target.closest('.fish-card');
+  if(card) { isDragging=true; dragTarget=card; }
+});
+document.addEventListener('mouseup', e => {
+  if(isDragging && dragTarget) {
+    dragTarget.classList.add('fish-escape');
+    const ex = (Math.random()-0.5)*300;
+    const ey = (Math.random()-0.5)*200;
+    dragTarget.style.setProperty('--ex', ex+'px');
+    dragTarget.style.setProperty('--ey', ey+'px');
+    dragTarget.style.setProperty('--er', (Math.random()-0.5)*90+'deg');
+    setTimeout(()=>{dragTarget.classList.remove('fish-escape');dragTarget.style.transform='';},1000);
+  }
+  isDragging=false; dragTarget=null;
+});
+
+// ─── 93. Double-tap mobile ───
+let lastTap = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if(now - lastTap < 300) {
+    const d = el('div','','🐬');
+    d.style.cssText=`position:fixed;top:30%;left:50%;font-size:3rem;z-index:900;pointer-events:none;animation:ancientAwaken 2s ease-out forwards`;
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(), 2500);
+  }
+  lastTap = now;
+});
+
+// ─── 94-95. Resize ───
+window.addEventListener('resize', () => {
+  if(window.innerWidth <= 480) {
+    const w = el('div','','🌊 潮汐波！');
+    w.className = 'tsunami-wave';
+    document.body.appendChild(w);
+    setTimeout(()=>w.remove(), 2500);
+  } else {
+    for(let i=0;i<12;i++){
+      setTimeout(()=>{
+        const f = el('div','','🐟');
+        f.style.cssText=`position:fixed;top:${Math.random()*70}%;left:-50px;font-size:1.2rem;z-index:900;pointer-events:none;animation:swimRight ${5+Math.random()*5}s linear forwards`;
+        document.body.appendChild(f);
+        setTimeout(()=>f.remove(), 12000);
+      }, i*300);
+    }
+  }
+});
+
+// ─── 96-97. Online/offline ───
+window.addEventListener('offline', () => document.body.classList.add('fish-hide'));
+window.addEventListener('online', () => {
+  document.body.classList.remove('fish-hide');
+  document.body.classList.add('fish-celebrate');
+  setTimeout(()=>document.body.classList.remove('fish-celebrate'),3000);
+});
+
+// ─── 98. Three finger touch → secret menu ───
+let touchCount = 0;
+document.addEventListener('touchstart', e => {
+  if(e.touches.length >= 3) {
+    touchCount++;
+    if(touchCount >= 2) {
+      const m = el('div','');
+      m.className = 'secret-menu';
+      m.innerHTML = '<h2>🔐 秘密選單</h2><p>你發現了隱藏內容！<br>試著找到那條看不見的魚...<br>試著搖晃手機<br>試著找到 666px 的深淵</p>';
+      document.body.appendChild(m);
+      setTimeout(()=>m.remove(), 5000);
+      touchCount = 0;
+    }
+  }
+});
+
+// ─── 99. Shake phone ───
+if(window.DeviceMotionEvent) {
+  window.addEventListener('devicemotion', e => {
+    const a = Math.abs(e.accelerationIncludingGravity.x || 0) + Math.abs(e.accelerationIncludingGravity.y || 0);
+    if(a > 25) {
+      document.body.classList.add('earthquake-shake');
+      const fish = el('div','','🐟 地震魚！');
+      fish.style.cssText='position:fixed;top:40%;left:40%;font-size:2rem;z-index:900;pointer-events:none';
+      document.body.appendChild(fish);
+      setTimeout(()=>{document.body.classList.remove('earthquake-shake');fish.remove();},2000);
+    }
+  });
+}
+
+// ─── 100. Invisible fish ───
+let invisibleFound = false;
+$('invisibleFish').addEventListener('click', () => {
+  if(invisibleFound) return;
+  invisibleFound = true;
+  const s = el('div','','🐟 找到了！！你就是那個幸運的發現者！！✨🌟✨');
+  s.className = 'secret-found';
+  document.body.appendChild(s);
+  setTimeout(()=>s.remove(), 4000);
+});
+
+// ─── Midnight mode check ───
+function checkMidnight() {
+  const h = new Date().getHours();
+  if(h === 0) $('midnightOverlay').classList.add('active');
+  if(h >= 0 && h < 6) $('midnightOverlay').classList.add('active');
+}
+checkMidnight();
+
+// ─── Weekend/weekday fish ───
+const day = new Date().getDay();
+if(day === 0 || day === 6) showMsg('🎉 週六魚！放鬆一下吧！');
+if(day >= 1 && day <= 5) setTimeout(()=>showMsg('🐟 週一 Blues... 加油！'), 5000);
+
+// ─── Helper functions ───
+function showEffect(text, pos, duration) {
+  const e = el('div','');
+  e.textContent = text;
+  e.style.cssText = `position:fixed;${pos};z-index:900;pointer-events:none;font-size:1.2rem;white-space:nowrap;animation:secretReveal 2s ease-out forwards`;
+  document.body.appendChild(e);
+  setTimeout(()=>e.remove(), duration || 3000);
+}
+
+function showMsg(text) {
+  const m = el('div','');
+  m.className = 'msg-flash';
+  m.textContent = text;
+  document.body.appendChild(m);
+  setTimeout(()=>m.remove(), 2500);
+}
+
+// ─── Background fish swimmers ───
+const fishIcons = ['🐟','🐠','🐡','🐙','🦈','🐬','🐢','🦑','🦀','🪼'];
+function spawnFish() {
+  const f = el('div','');
+  f.className = 'fish-swimmer';
+  f.textContent = fishIcons[Math.floor(Math.random()*fishIcons.length)];
+  f.style.cssText = `top:${10+Math.random()*75}%;font-size:${1+Math.random()*1.5}rem;opacity:${0.15+Math.random()*0.3};animation:swimRight ${15+Math.random()*20}s linear infinite;animation-delay:-${Math.random()*20}s`;
+  $('fishBg').appendChild(f);
+}
+for(let i=0;i<15;i++) spawnFish();
+
+// ─── Bubbles ───
+function spawnBubble() {
+  const b = el('div','');
+  b.className = 'bubble';
+  const size = 6 + Math.random()*20;
+  b.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;animation-duration:${6+Math.random()*10}s;animation-delay:-${Math.random()*10}s`;
+  $('bubbles').appendChild(b);
+}
+for(let i=0;i<20;i++) spawnBubble();
+
+// ─── Clock ───
+function updateClock() {
+  const n = new Date();
+  $('clockDisplay').textContent = `${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}:${n.getSeconds().toString().padStart(2,'0')}`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ─── Fish hover look at cursor ───
+document.addEventListener('mousemove', e => {
+  $$('.fish-card').forEach(card => {
+    const rect = card.getBoundingClientRect();
+    if(e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+      const dx = e.clientX - (rect.left + rect.width/2);
+      card.style.transform = `translateY(-3px) rotate(${dx * 0.1}deg)`;
+    } else {
+      card.style.transform = '';
+    }
+  });
+});
+
+console.log('🐳 魚的秘密花園 loaded — 100 Easter Eggs inside!');
+</script>
+</body>
+</html>
